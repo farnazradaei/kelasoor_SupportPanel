@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserSerializer
 from django.contrib.auth.models import Group
+from apps.users import utils
+
 
 class UserCreateView(APIView):
     def post(self, request):
@@ -23,6 +25,6 @@ class UserCreateView(APIView):
 
 
 
-class HelloAPIView(APIView):
+class HomeView(APIView):
     def get(self, request):
-        return Response({"message": "Hello from Users API!"})
+        return Response({"message": "Welcome to Classoor API!"})

@@ -44,11 +44,12 @@ INSTALLED_APPS = [
     'blog',
     'bootcamps',
     'finance',
-       'tickets',
+    'tickets',
     'rest_framework',
+    'rest_framework_simplejwt',
     'phonenumber_field',
-    'users.apps.UsersConfig'
-]
+    'apps.users',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -147,3 +148,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+KAVENEGAR_API_KEY = '37316A4A677756394D5649486C44516D5557413255517857776F704349536D694B2F5275562F76305569593D'
+AUTH_USER_MODEL = 'users.User'
