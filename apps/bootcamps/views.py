@@ -1,8 +1,9 @@
-from rest_framework import viewsets
+from rest_framework import viewsets , generics , permissions
 from rest_framework.permissions import IsAuthenticated
-from models import Bootcamp , BootcampCategory
-from .serializers import Bootcampserializer , BootcampCategorySerializer
-from .permissions import IsAdminOrReadOnly
+from models import Bootcamp , BootcampCategory ,BootcampRegistration  
+from .serializers import Bootcampserializer , BootcampCategorySerializer ,BootcampRegistrationSerializer
+from .permissions import IsAdminOrReadOnly 
+from django.core.exceptions import ValidationError
 
 
 
@@ -23,3 +24,15 @@ class AdvancedBootcampViewSet(viewsets.ModelViewSet):
     serializer_class = Bootcampserializer
     permission_classes = [IsAuthenticated , IsAdminOrReadOnly]
 
+
+class BootcampRegistrationCreateView(generics.CreateAPIView):
+    queryset = BootcampRegistration.objects.all()
+    serializer_class = BootcampRegistrationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        Bootcamp = serializer.validated_data['bootcamp']
+        if Bootcamp.status != Bootcamp.StatusChoices.OPEN:
+            raise ValidationError("sabatnam dar in bootcamp faal nist")
+        serializer.save()
+    
