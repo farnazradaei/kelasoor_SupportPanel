@@ -44,3 +44,22 @@ class BootcampRole(models.Model):
 
     def __str__(self):
         return f"{self.user.phone_number} - {self.bootcamp.title} - {self.role}"
+
+class BootcampRegistration(models.model):
+    class statuschoices(models.Choices):
+        PENDING = 'PENDING' , 'barresi nashod'
+        UNDER_REVIEW = 'under_review' , 'dar hale barrsi'
+        ACCEPTED = 'accepted' , 'taeid shode'
+        REJECTED = 'rejected' , 'taeid nashode'
+
+
+    Bootcamp = models.ForeignKey(Bootcamp , on_delete=models.CASCADE , related_name='registration')
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20 , choices=statuschoices.choices , default=statuschoices.PENDING)
+
+
+    def __str__(self):
+        return f"{self.full_name} - {self.bootcamp.title}"
