@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BootcampCategory , Bootcamp , BootcampRole
+from .models import BootcampCategory , Bootcamp , BootcampRole , BootcampRegistration
 from django.contrib.auth import get_user_model
 
 
@@ -62,3 +62,9 @@ class BootcampDetailSerializer(serializers.ModelSerializer):
             'roles',
             
         ]
+
+class BootcampRegistrationSerializer(serializers.Serializer):
+    class Meta :
+        model = BootcampRegistration
+        feilds = ['id' , 'bootcamp' , 'full_name' , 'email' , 'phone_number' , 'created_at', 'status' ]
+        raed_only =['id' , 'creayed_at' , 'status']
