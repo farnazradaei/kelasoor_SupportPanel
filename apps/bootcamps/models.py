@@ -36,7 +36,7 @@ class BootcampRole(models.Model):
         TEACHER = 'teacher' , 'teacher'
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE ,related_name='bootcamp_roles')
-    Bootcamp = models.ForeignKey(Bootcamp ,  on_delete=models.CASCADE , related_name='bootcamp_roles')
+    bootcamp = models.ForeignKey(Bootcamp ,  on_delete=models.CASCADE , related_name='bootcamp_roles')
     role = models.CharField(max_length=10 , choices=RoleType.choices)
 
     class Meta:
@@ -46,7 +46,7 @@ class BootcampRole(models.Model):
         return f"{self.user.phone_number} - {self.bootcamp.title} - {self.role}"
 
 class BootcampRegistration(models.Model):
-    class statuschoices(models.Choices):
+    class statuschoices(models.TextChoices):
         PENDING = 'PENDING' , 'barresi nashod'
         UNDER_REVIEW = 'under_review' , 'dar hale barrsi'
         ACCEPTED = 'accepted' , 'taeid shode'
