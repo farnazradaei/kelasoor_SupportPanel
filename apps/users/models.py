@@ -1,19 +1,17 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager , Group
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager , Group , Permission
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db import models
 from django.utils import timezone
-<<<<<<< Updated upstream
-=======
-from datetime import timedelta
-from django.contrib.auth.models import Group
->>>>>>> Stashed changes
+from django.utils.translation import gettext_lazy as _
+
 
 class UserManager(BaseUserManager):
    def get_by_natural_key(self, phone_number):
     return self.get(phone_number=phone_number)
+   
    def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
-            raise ValueError('Users must have a phone number')
+            raise ValueError(_('Users must have a phone number'))
         user = self.model(phone_number=phone_number, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -24,10 +22,10 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
+            raise ValueError(_('Superuser must have is_staff=True.'))
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
+            raise ValueError(_('Superuser must have is_superuser=True.'))
+     
         return self.create_user(phone_number, password, **extra_fields)
 
 
@@ -56,36 +54,56 @@ class User (AbstractBaseUser , PermissionsMixin):
     is_staff = models.BooleanField(default=False)  
     is_active = models.BooleanField(default=True)
 
+    assigned_permissions  = models.ManyToManyField(
+        Permission ,
+        blank= True ,
+        related_name= 'custom_user_permissions'
+    )
+
     objects = UserManager()
 
 
-    def save(self , *args , **kwargs):
-        super().save(*args , **kwargs)
-        if self.role == 'support' :
-            group = Group.objects.get(name = 'support')
-            self.groups.set([group])
-        elif self.role == 'superuser':
-            group = Group.objects.get(name ='superuser')
-            self.groups.set([group])
-        else:
-            self.groups.clear()
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            if self.role == 'support':
+                group, _ = Group.objects.get_or_create(name='support')
+                self.groups.set([group])
+            elif self.role == 'superuser':
+                group, _ = Group.objects.get_or_create(name='superuser')
+                self.groups.set([group])
+            else:
+                self.groups.clear()
+        except Exception as e:
+
+            pass
+    
+    def __str__(self):
+        return f'{self.phone_number} - {self.role}'
+
+    class Meta:
+        app_label = 'users'
+        verbose_name = 'کاربر'
+        verbose_name_plural = 'کاربران'
+
+
 
 
 class OTP(models.Model):
-    phone_number = models.CharField(max_length=15) 
-    code = models.CharField(max_length=6)        
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
+    code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
-<<<<<<< Updated upstream
+
     def is_valid(self):
         return timezone.now() <= self.expires_at
-=======
-    def is_expired(self):
-        return timezone.now() > self.expires_at
+    
+    def __str__(self):
+        return f'OTP for {self.user.phone_number}'
 
-    def save(self, *args, **kwargs):
-        if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(minutes=5)  # انقضا ۵ دقیقه
-        super().save(*args, **kwargs)
->>>>>>> Stashed changes
+    
+    class Meta:
+        app_label = 'users'
+        verbose_name = 'رمز یک‌بار مصرف'
+        verbose_name_plural = 'رمزهای یک‌بار مصرف'
