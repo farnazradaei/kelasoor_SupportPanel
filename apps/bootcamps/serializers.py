@@ -1,70 +1,50 @@
 from rest_framework import serializers
-from .models import BootcampCategory , Bootcamp , BootcampRole , BootcampRegistration
 from django.contrib.auth import get_user_model
+from .models import(
+     BootcampCategory, 
+     Bootcamp, 
+     BootcampRole, 
+     BootcampRegistration)
 
-
-user = get_user_model()
+User = get_user_model()
 
 class BootcampCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BootcampCategory
-        fields = ['id' , 'name']
+        fields = ['id', 'title']
 
 
-class BootcampRoleSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=user.objects.all())
-    Bootcamp = serializers.PrimaryKeyRelatedField(queryset=Bootcamp.objects.all())
-
-    class Meta:
-        model = BootcampRole
-        fields = ['id','user','bootcamp','role']
-
-
-class Bootcampserializer(serializers.ModelSerializer):
+class BootcampSerializer(serializers.ModelSerializer):
     category = BootcampCategorySerializer(read_only=True)
     category_id = serializers.PrimaryKeyRelatedField(
-        queryset = BootcampCategory.objects.all(),
-        source = 'category',
-        write_only=True
+        queryset=BootcampCategory.objects.all(), source='category', write_only=True
     )
 
     class Meta:
         model = Bootcamp
         fields = [
-            'id',
-            'title',
-            'category',
-            'category_id',
-            'start_date',
-            'days',
-            'time',
-            'capacity',
-            'status',
-
+            'id', 'title', 'start_date', 'days_of_week', 'time',
+            'capacity', 'status', 'category', 'category_id'
         ]
 
+class BootcampRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BootcampRegistration
+        fields = [
+            'id', 'bootcamp', 'full_name', 'email', 'phone_number',
+            'created_at', 'status'
+        ]
+        read_only_fields = ['created_at', 'status']
 
-class BootcampDetailSerializer(serializers.ModelSerializer):
-    category = BootcampCategorySerializer(read_only=True)
-    roles = BootcampRoleSerializer(source='bootcamprole_sat', many=True , read_only=True)
+class BootcampRoleCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BootcampRole
+        fields = ['id', 'user', 'bootcamp', 'role']
+
+class BootcampRoleSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    bootcamp = serializers.StringRelatedField()
 
     class Meta:
-        model = Bootcamp
-        fields = [
-            'id',
-            'title',
-            'category',
-            'start_date',
-            'days',
-            'time',
-            'capacity',
-            'status',
-            'roles',
-            
-        ]
-
-class BootcampRegistrationSerializer(serializers.Serializer):
-    class Meta :
-        model = BootcampRegistration
-        feilds = ['id' , 'bootcamp' , 'full_name' , 'email' , 'phone_number' , 'created_at', 'status' ]
-        raed_only =['id' , 'creayed_at' , 'status']
+        model = BootcampRole
+        fields = ['id', 'user', 'bootcamp', 'role']
