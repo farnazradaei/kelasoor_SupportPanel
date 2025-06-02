@@ -45,7 +45,7 @@ class BootcampRole(models.Model):
     def __str__(self):
         return f"{self.user.phone_number} - {self.bootcamp.title} - {self.role}"
 
-class BootcampRegistration(models.model):
+class BootcampRegistration(models.Model):
     class statuschoices(models.Choices):
         PENDING = 'PENDING' , 'barresi nashod'
         UNDER_REVIEW = 'under_review' , 'dar hale barrsi'
