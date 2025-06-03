@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from apps.tickets.models import Ticket
 from apps.finance.models import Finance
 from apps.blog.models import Blog
-from apps.users.models import User
+from apps.account.models import User
 
 
 groups = {

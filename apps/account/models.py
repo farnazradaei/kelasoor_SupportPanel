@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+
 class UserManager(BaseUserManager):
    def get_by_natural_key(self, phone_number):
     return self.get(phone_number=phone_number)
@@ -29,7 +30,7 @@ class UserManager(BaseUserManager):
         return self.create_user(phone_number, password, **extra_fields)
 
 
-class User (AbstractBaseUser , PermissionsMixin):
+class CustomUser(AbstractBaseUser , PermissionsMixin):
     
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
@@ -40,7 +41,7 @@ class User (AbstractBaseUser , PermissionsMixin):
     )
 
     ROLE_CHOICE = [
-        ('user' , 'user'),
+        ('user', 'user'),
         ('support' , 'support'),
         ('superuser', 'superuser',)
     ]
@@ -49,15 +50,27 @@ class User (AbstractBaseUser , PermissionsMixin):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     national_id = models.CharField(max_length=10 , unique=True)
-    gender = models.CharField(max_length=10 , choices=Gender_choices)
+    gender = models.CharField(max_length=10, choices=Gender_choices)
     role = models.CharField(max_length=20, choices=ROLE_CHOICE , default='user'  , editable=False)
     is_staff = models.BooleanField(default=False)  
     is_active = models.BooleanField(default=True)
 
-    assigned_permissions  = models.ManyToManyField(
-        Permission ,
-        blank= True ,
-        related_name= 'custom_user_permissions'
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=_("groups"),
+        blank=True,
+        help_text=_(
+            "The groups this user belongs to. A user will get all permissions "
+            "granted to each of their groups."
+        ),
+        related_name="custom_user_set",
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        null=True,
+        related_name='custom_user_permissions',
+        through='CustomUserPermission'
     )
 
     objects = UserManager()
@@ -82,7 +95,7 @@ class User (AbstractBaseUser , PermissionsMixin):
         return f'{self.phone_number} - {self.role}'
 
     class Meta:
-        app_label = 'users'
+        app_label = 'account'
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
 
@@ -90,7 +103,7 @@ class User (AbstractBaseUser , PermissionsMixin):
 
 
 class OTP(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='otps')
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -107,3 +120,12 @@ class OTP(models.Model):
         app_label = 'users'
         verbose_name = 'رمز یک‌بار مصرف'
         verbose_name_plural = 'رمزهای یک‌بار مصرف'
+
+
+class CustomUserPermission(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = 'account'
+        unique_together = ('user', 'permission')
